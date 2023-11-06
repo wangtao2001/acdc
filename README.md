@@ -37,8 +37,26 @@ dataset/
 #### NIFTI 格式说明：
 标准NIFTI图像（扩展名是.nii），其中包含了头文件h（hdr）及图像资料（img）。单独的.nii格式文件的优势就是可以用标准的压缩软件（如gzip），而且一些分析软件包可以直接读取和写入压缩的.nii文件（扩展名为.nii.gz）。
 
-软件预览：itk-snap（基本的使用方法待补充...）
+使用软件预览：itk-snap（基本的使用方法待补充...）
 
-使用python读取：`preview.py`
+使用python读取.nii（.nii.gz）文件：`loader.py`
 
 ## 3.数据预处理
+
+## 4.评估指标
+
+Dice：
+
+## 5.模型
+
+#### Model 1: U-Net
+
+## 6.训练
+
+## 7.结果
+
+## 8.参考
+
+https://zhuanlan.zhihu.com/p/658483739
+
+https://arxiv.org/abs/1709.04496
