@@ -18,7 +18,7 @@ ACDC (Automatic Cardiac Diagnosis Challenge) 是 MICCAI 2017 中的的挑战赛�
 
 
 ```
-dataset/ 
+acdc_challenge_20170617/ 
     training/ -训练集
         patient001/ -病例 001-100
             Info.cfg -病例说明
@@ -37,11 +37,25 @@ dataset/
 #### NIFTI 格式说明：
 标准NIFTI图像（扩展名是.nii），其中包含了头文件h（hdr）及图像资料（img）。单独的.nii格式文件的优势就是可以用标准的压缩软件（如gzip），而且一些分析软件包可以直接读取和写入压缩的.nii文件（扩展名为.nii.gz）。
 
-使用软件预览：itk-snap（基本的使用方法待补充...）
+使用软件预览：itk-snap
 
 使用python读取.nii（.nii.gz）文件：`loader.py`
 
 ## 3.数据预处理
+
+#### 重采样
+
+体素即体积元素（Volume Pixel），一张3d图像可以看成是由若干个体素构成的，体素是一张3d医疗图像在空间上的最小单元。这里将体素大小修改为 1.37mm * 1.37mm，并且保持深度不变。
+
+#### 切片
+
+这里只考虑了ED时期的数据，将水平面的全层抽取。对于输出的图像大小不一致的问题，可能的策略包括：填充0值、切分patch、裁剪...这里选择以标签区域为中心做图像裁剪，裁剪到..., 并进行归一化。
+
+上述代码见 `convert.py`。
+
+#### 数据增强
+
+待补充...
 
 ## 4.评估指标
 
@@ -57,6 +71,10 @@ Dice：
 
 ## 8.参考
 
-https://zhuanlan.zhihu.com/p/658483739
+[1] https://zhuanlan.zhihu.com/p/658483739
 
-https://arxiv.org/abs/1709.04496
+[2] https://blog.csdn.net/lavinia_chen007/article/details/125389503
+
+[3] https://blog.csdn.net/cvxiayixiao/article/details/133232554
+
+[4] https://arxiv.org/abs/1709.04496
