@@ -4,7 +4,7 @@ import numpy as np
 import skimage
 
 
-class niiLoader:
+class NIFITLoader:
 
     """
         对nibabel库的封装
