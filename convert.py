@@ -33,8 +33,6 @@ def fill(data: np.ndarray, shape: Tuple[int, int]) -> np.ndarray:
     return np.pad(data, ((pad_top, pad_bottom), (pad_left, pad_right)), 'constant', constant_values=0)
 
 
-
-
 if __name__ == '__main__':
     for root, _ , files in os.walk('acdc_challenge_20170617'):
         nii_files = [f for f in files if f.endswith('_frame01.nii.gz') or f.endswith('_frame01_gt.nii.gz') ]
@@ -44,4 +42,3 @@ if __name__ == '__main__':
             # 分别处理数据和相应标签
             for i, v in enumerate(['data', 'label']):
                 covert(os.path.join(root, nii_files[i]), f'dataset/{m}/{v}')
-            
