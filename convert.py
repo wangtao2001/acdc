@@ -2,9 +2,9 @@ import os
 import cv2
 from loader import NIFITLoader
 import numpy as np
-from typing import Tuple, List
+from typing import Tuple
 
-def covert(input_file, output_path):
+def covert(input_file, output_path, label=False):
     """
         水平方向上切片并处理
     """
@@ -13,8 +13,10 @@ def covert(input_file, output_path):
     for slice in range(array.shape[2]):
         data = array[:, :, slice]
         data = np.array(cv2.normalize(data, None, 0, 255, cv2.NORM_MINMAX)) # 将值缩放到0-255
-        output_file = os.path.join(output_path, input_file.split('/')[-1].rstrip('.nii.gz')+f'_{slice+1}.jpg')
-        data = fill(data, (384, 384))
+        if label:
+            data = np.where(data >= 240, 255, 0) # 只保留左心室并消除插值的影响
+        output_file = os.path.join(output_path, input_file.split('/')[-1].rstrip('.nii.gz')+f'_{slice+1}.png')
+        # data = fill(data, (384, 384))
         cv2.imwrite(output_file, data)
 
 
@@ -40,5 +42,5 @@ if __name__ == '__main__':
             m = 'train' if root.split('/')[-2] == 'training' else 'test'
             nii_files.sort()
             # 分别处理数据和相应标签
-            for i, v in enumerate(['data', 'label']):
-                covert(os.path.join(root, nii_files[i]), f'dataset/{m}/{v}')
+            covert(os.path.join(root, nii_files[0]), f'dataset/{m}/data')
+            covert(os.path.join(root, nii_files[1]), f'dataset/{m}/label', label=True)
