@@ -37,20 +37,20 @@ class UNet(nn.Module):
         self.center_conv = DoubleConv(512, 1024)
 
         # right
-        self.up_1 = nn.ConvTranspose2d(1024, 512, 2, 2)
+        self.up_1 = nn.ConvTranspose2d(1024, 512, 2, 2, 0)
         self.right_conv_1 = DoubleConv(1024, 512)
 
-        self.up_2 = nn.ConvTranspose2d(512, 256, 2, 2)
+        self.up_2 = nn.ConvTranspose2d(512, 256, 2, 2, 0)
         self.right_conv_2 = DoubleConv(512, 256)
 
-        self.up_3 = nn.ConvTranspose2d(256, 128, 2, 2)
+        self.up_3 = nn.ConvTranspose2d(256, 128, 2, 2, 0)
         self.right_conv_3 = DoubleConv(256, 128)
 
         self.up_4 = nn.ConvTranspose2d(128, 64, 2, 2)
         self.right_conv_4 = DoubleConv(128, 64)
 
         # output
-        self.output = nn.Conv2d(64, 1, 1, 1, 0)
+        self.output = nn.Conv2d(64, 4, 1, 1, 0)
 
     def forward(self, x):
         # left

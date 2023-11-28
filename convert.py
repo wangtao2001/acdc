@@ -3,24 +3,25 @@ import cv2
 from loader import NIFITLoader
 import numpy as np
 from typing import Tuple
+from torchvision import transforms
 
 def covert(input_file, output_path, label=False):
     """
         水平方向上切片并处理
     """
     l = NIFITLoader(input_file)
-    array = l.resample([1.37, 1.37, l.get_pixdim()[2]])
+    # array = l.resample([1.37, 1.37, l.get_pixdim()[2]])
+    array = l.get_array()
     for slice in range(array.shape[2]):
         data = array[:, :, slice]
-        data = np.array(cv2.normalize(data, None, 0, 255, cv2.NORM_MINMAX)) # 将值缩放到0-255
         if label:
-            data = np.where(data >= 240, 255, 0) # 只保留左心室并消除插值的影响
+            data = np.array(cv2.normalize(data, None, 0, 255, cv2.NORM_MINMAX)) # 将值缩放到0-255
         output_file = os.path.join(output_path, input_file.split('/')[-1].rstrip('.nii.gz')+f'_{slice+1}.png')
-        # data = fill(data, (384, 384))
+        data = center_crop(data)
         cv2.imwrite(output_file, data)
 
 
-def fill(data: np.ndarray, shape: Tuple[int, int]) -> np.ndarray:
+def fill(data: np.ndarray, shape: Tuple[int, int] = (366, 366)) -> np.ndarray:
     """
         四周填充0值
     """
@@ -33,6 +34,17 @@ def fill(data: np.ndarray, shape: Tuple[int, int]) -> np.ndarray:
 
     # 使用np.pad进行填充
     return np.pad(data, ((pad_top, pad_bottom), (pad_left, pad_right)), 'constant', constant_values=0)
+
+def center_crop(matrix, shape: Tuple[int, int] = (128, 128)):
+    """
+        中心裁剪
+    """
+    height, width = matrix.shape
+    start_row = (height - shape[0]) // 2
+    start_col = (width - shape[1]) // 2
+    cropped_matrix = matrix[start_row:start_row + shape[0], start_col:start_col + shape[1]]
+
+    return cropped_matrix
 
 
 if __name__ == '__main__':
