@@ -21,36 +21,36 @@ class UNet(nn.Module):
     def __init__(self):
         super().__init__()
         # left
-        self.left_conv_1 = DoubleConv(1, 64)
+        self.left_conv_1 = DoubleConv(1, 48)
         self.down_1 = nn.MaxPool2d(2, 2)
 
-        self.left_conv_2 = DoubleConv(64, 128)
+        self.left_conv_2 = DoubleConv(48, 96)
         self.down_2 = nn.MaxPool2d(2, 2)
 
-        self.left_conv_3 = DoubleConv(128, 256)
+        self.left_conv_3 = DoubleConv(96, 192)
         self.down_3 = nn.MaxPool2d(2, 2)
 
-        self.left_conv_4 = DoubleConv(256, 512)
+        self.left_conv_4 = DoubleConv(192, 384)
         self.down_4 = nn.MaxPool2d(2, 2)
 
         # center
-        self.center_conv = DoubleConv(512, 1024)
+        self.center_conv = DoubleConv(384, 768)
 
         # right
-        self.up_1 = nn.ConvTranspose2d(1024, 512, 2, 2, 0)
-        self.right_conv_1 = DoubleConv(1024, 512)
+        self.up_1 = nn.ConvTranspose2d(768, 384, 2, 2)
+        self.right_conv_1 = DoubleConv(768, 384)
 
-        self.up_2 = nn.ConvTranspose2d(512, 256, 2, 2, 0)
-        self.right_conv_2 = DoubleConv(512, 256)
+        self.up_2 = nn.ConvTranspose2d(384, 192, 2, 2)
+        self.right_conv_2 = DoubleConv(384, 192)
 
-        self.up_3 = nn.ConvTranspose2d(256, 128, 2, 2, 0)
-        self.right_conv_3 = DoubleConv(256, 128)
+        self.up_3 = nn.ConvTranspose2d(192, 96, 2, 2)
+        self.right_conv_3 = DoubleConv(192, 96)
 
-        self.up_4 = nn.ConvTranspose2d(128, 64, 2, 2)
-        self.right_conv_4 = DoubleConv(128, 64)
+        self.up_4 = nn.ConvTranspose2d(96, 48, 2, 2)
+        self.right_conv_4 = DoubleConv(96, 48)
 
         # output
-        self.output = nn.Conv2d(64, 4, 1, 1, 0)
+        self.output = nn.Conv2d(48, 4, 1, 1, 0)
 
     def forward(self, x):
         # left
