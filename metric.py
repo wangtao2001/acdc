@@ -1,36 +1,31 @@
 import numpy as np
 import torch
 
-def dice_(y_true, y_pred, smooth=1):  
-    intersection = torch.mul(y_true, y_pred).sum()
-    return (2 * intersection + smooth) / (y_true.sum() + y_pred.sum() + smooth)
+def dice_(label, pred, smooth=1):  
+    intersection = torch.mul(label, pred).sum()
+    return (2 * intersection + smooth) / (label.sum() + pred.sum() + smooth)
 
-def batch_dice(y_true, y_pred, classes=4, smooth=1):
-    # size: B, H, W
-    batch_dice = np.zeros((y_true.shape[0], classes-1)) # B, Class
-    for i in range(y_true.shape[0]): # 每个batch
-        for j in range(1, classes): # 每个类 Ignore the background class("0")
-            t = torch.where(y_true[i,:,:] ==j, 1, 0)
-            p = torch.where(y_pred[i,:,:] ==j, 1, 0)
+def dice_mean(label, pred, classes=4, smooth=1):
+    # size: (batch, H, W)
+    batch_dice = np.zeros((label.shape[0], classes-1)) # (batch, classes)
+    for i in range(label.shape[0]): # 每个batch
+        for j in range(1, classes): # 每个类 ignore the background class 0
+            t = torch.where(label[i,:,:] ==j, 1, 0)
+            p = torch.where(pred[i,:,:] ==j, 1, 0)
             batch_dice[i][j-1] = dice_(t, p, smooth)
-    return np.mean(batch_dice, axis=0).tolist() # (1, classes-1) 表示各类单独的dice
+    return np.mean(batch_dice)
 
-def iou_mean(pred, target, n_classes=4):
-    ious = []
-    iousSum = 0
+def iou_mean(label, pred, classes=4):
+    ious_sum = 0
     pred = pred.view(-1)
-    target = np.array(target.cpu())
-    target = torch.from_numpy(target)
-    target = target.view(-1)
-    # Ignore Iou for background class("0")
-    for cls in range(1, n_classes):
+    label = np.array(label.cpu())
+    label = torch.tensor(label)
+    label = label.view(-1)
+    # ignore Iou for background class 0
+    for cls in range(1, classes):
         pred_inds = pred == cls
-        target_inds = target == cls
-        intersection = (pred_inds[target_inds]).long().sum().data.cpu().item()
-        union = pred_inds.long().sum().data.cpu().item() + target_inds.long().sum().data.cpu().item() - intersection
-        if union == 0:
-            ious.append(float('nan'))
-        else:
-            ious.append(float(intersection) / float(max(union, 1)))
-            iousSum += float(intersection) / float(max(union, 1))
-    return iousSum / (n_classes - 1)
+        label_inds = label == cls
+        intersection = (pred_inds[label_inds]).long().sum().data.cpu().item()
+        union = pred_inds.long().sum().data.cpu().item() + label_inds.long().sum().data.cpu().item() - intersection
+        ious_sum += float(intersection) / float(max(union, 1))
+    return ious_sum / (classes - 1)

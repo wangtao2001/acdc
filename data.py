@@ -4,7 +4,6 @@ import torch
 from torch.utils.data import Dataset, DataLoader
 from torchvision import transforms
 import nibabel as nib
-from matplotlib import pyplot as plt
 
 seed = torch.random.seed()
 

@@ -1,7 +1,7 @@
 from tqdm import tqdm
 from torch.nn import CrossEntropyLoss
 import torch
-from metric import batch_dice, iou_mean
+from metric import dice_mean, iou_mean
 import numpy as np
 
 def train(epoch, model, iterator, optimizer, device):
@@ -9,15 +9,15 @@ def train(epoch, model, iterator, optimizer, device):
     model.train()
     criterion = CrossEntropyLoss()
     losses = []
-    ious = []
+    dices = []
 
     with tqdm(total=len(iterator), desc=f'epoch {epoch}') as pbar:
-        for data, label in iterator:
+        for img, label in iterator:
             # data: (batch, 1, H, W)
             # label: (batch, H, W)
-            data, label = data.to(device), label.to(device)
+            img, label = img.to(device), label.to(device)
             pbar.update(1)
-            hat = model(data)
+            hat = model(img)
             # hat:(batch, 4, H, W) 4：类别数
             l = criterion(hat, label.long())
             losses.append(l.item())
@@ -27,23 +27,23 @@ def train(epoch, model, iterator, optimizer, device):
 
             with torch.no_grad():
                 pred = torch.argmax(hat, dim=1)
-                ious.append(iou_mean(pred, label)) # 每个batch下的iou
+                dices.append(dice_mean(label, pred)) # 每个batch下的iou
             
-    print(f'epoch: {epoch}, train loss: {round(l.item(), 4)}, train mean iou: {np.mean(ious)}')
-    return losses, ious
+    print(f'epoch: {epoch}, train loss: {round(l.item(), 4)}, train mean iou: {np.mean(dices)}')
+    return losses, dices
 
 def test(epoch, model, iterator, device):
     model = model.to(device)
     model.eval()
-    ious = []
+    dices = []
     with torch.no_grad():
         with tqdm(total=len(iterator), desc=f'epoch {epoch}') as pbar:
-            for data, label in iterator:
-                data, label = data.to(device), label.to(device)
+            for img, label in iterator:
+                img, label = img.to(device), label.to(device)
                 pbar.update(1)
-                hat = model(data)
+                hat = model(img)
                 pred = torch.argmax(hat, dim=1)
-                ious.append(iou_mean(label, pred))
-    print(f'epoch: {epoch}, test mean iou: {np.mean(ious)}')
-    return ious
+                dices.append(dice_mean(label, pred))
+    print(f'epoch: {epoch}, test mean iou: {np.mean(dices)}')
+    return dices
 
