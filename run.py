@@ -29,7 +29,7 @@ def train(epoch, model, iterator, optimizer, device):
                 pred = torch.argmax(hat, dim=1)
                 dices.append(dice_mean(label, pred)) # 每个batch下的iou
             
-    print(f'epoch: {epoch}, train loss: {round(l.item(), 4)}, train mean iou: {np.mean(dices)}')
+    print(f'epoch: {epoch+1}, train loss: {round(l.item(), 4)}, train mean iou: {np.mean(dices)}')
     return losses, dices
 
 def test(epoch, model, iterator, device):
@@ -44,6 +44,6 @@ def test(epoch, model, iterator, device):
                 hat = model(img)
                 pred = torch.argmax(hat, dim=1)
                 dices.append(dice_mean(label, pred))
-    print(f'epoch: {epoch}, test mean iou: {np.mean(dices)}')
+    print(f'epoch: {epoch+1}, test mean iou: {np.mean(dices)}')
     return dices
 

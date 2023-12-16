@@ -60,9 +60,9 @@ acdc_challenge_20170617/
 
 UNet是典型的Encoder-Decoder结构，在Encoder中先对图片进行卷积和池化，然后对特征图做上采样或者反卷积，同时对之前的特征图进行通道上的拼接concat。UNet网络层越深得到的特征图，有着更大的视野域，同时通过特征的拼接，来实现边缘特征的找回。
 
-#### Model 2: Unet++
+#### Model 2: UNet++
 
-
+UNet++由不同深度的UNet组成，其重新设计了skip connection，使得解码器的子网络可以聚合不同尺度的特征，更加灵活。同时通过deep supervision也可以做剪枝。更多细节见参考[6]。
 
 模型集见 `models.py`。
 
@@ -79,6 +79,7 @@ $$
 IoU:
 
 在检测任务中，使用交并比作为衡量指标,来描述两个框之间的重合度。这一概念来源于数学中的集合，用来描述两个集合之间的关系，它等于两个集合的交集里面所包含的元素个数，除以它们的并集里面所包含的元素个数。
+
 $$
     IoU = \frac{ pred \cap true }{ pred \cup true}
 $$
@@ -105,3 +106,5 @@ $$
 [4] https://arxiv.org/abs/1709.04496
 
 [5] https://zhuanlan.zhihu.com/p/311209275
+
+[6] https://zhuanlan.zhihu.com/p/44958351

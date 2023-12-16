@@ -1,7 +1,8 @@
 import numpy as np
 import torch
 
-def dice_(label, pred, smooth=1):  
+def dice_(label, pred, smooth=1):
+    # 对矩阵计算
     intersection = torch.mul(label, pred).sum()
     return (2 * intersection + smooth) / (label.sum() + pred.sum() + smooth)
 
