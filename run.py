@@ -1,17 +1,16 @@
 from tqdm import tqdm
 from torch.nn import CrossEntropyLoss
 import torch
-from metric import dice_mean, iou_mean
 import numpy as np
 
-def train(epoch, model, iterator, optimizer, device):
+def train(epoch, model, iterator, optimizer, metric,device):
     model = model.to(device)
     model.train()
     criterion = CrossEntropyLoss()
     losses = []
-    dices = []
+    m = []
 
-    with tqdm(total=len(iterator), desc=f'epoch {epoch}') as pbar:
+    with tqdm(total=len(iterator), desc=f'epoch {epoch+1}') as pbar:
         for img, label in iterator:
             # data: (batch, 1, H, W)
             # label: (batch, H, W)
@@ -27,23 +26,23 @@ def train(epoch, model, iterator, optimizer, device):
 
             with torch.no_grad():
                 pred = torch.argmax(hat, dim=1)
-                dices.append(dice_mean(label, pred)) # 每个batch下的iou
+                m.append(metric(label, pred)) # 每个batch下的iou
             
-    print(f'epoch: {epoch+1}, train loss: {round(l.item(), 4)}, train mean iou: {np.mean(dices)}')
-    return losses, dices
+    print(f'epoch: {epoch+1}, train loss: {round(l.item(), 4)}, train mean metric: {np.mean(m)}')
+    return losses, m
 
-def test(epoch, model, iterator, device):
+def test(epoch, model, iterator, metric, device):
     model = model.to(device)
     model.eval()
-    dices = []
+    m = []
     with torch.no_grad():
-        with tqdm(total=len(iterator), desc=f'epoch {epoch}') as pbar:
+        with tqdm(total=len(iterator), desc=f'epoch {epoch+1}') as pbar:
             for img, label in iterator:
                 img, label = img.to(device), label.to(device)
                 pbar.update(1)
                 hat = model(img)
                 pred = torch.argmax(hat, dim=1)
-                dices.append(dice_mean(label, pred))
-    print(f'epoch: {epoch+1}, test mean iou: {np.mean(dices)}')
-    return dices
+                m.append(metric(label, pred))
+    print(f'epoch: {epoch+1}, test mean metric: {np.mean(m)}')
+    return m
 

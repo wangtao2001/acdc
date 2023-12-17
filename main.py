@@ -3,11 +3,12 @@ from torch.utils.data import DataLoader
 import torch
 from run import train, test
 import os
-from models import UNet, UnetPlusPlus
+from models import UNet, UNetPlusPlus
 from torch.optim import AdamW
 from matplotlib import pyplot as plt
 import statsmodels.api as sm
 import argparse
+from metric import dice_mean, iou_mean, hd95_mean
 
 parser = argparse.ArgumentParser()
 parser.add_argument(
@@ -16,10 +17,19 @@ parser.add_argument(
     required=True,
     choices=['unet', 'unetpp']
 )
+parser.add_argument(
+    '--metric',
+    type=str,
+    required=True,
+    choices=['dice', 'iou', 'hd95']
+)
 args = parser.parse_args()
 
 modelset = {
-    'unet': UNet, 'unetpp': UnetPlusPlus
+    'unet': UNet, 'unetpp': UNetPlusPlus
+}
+metrics = {
+    'dice': dice_mean, 'iou': iou_mean, 'hd95': hd95_mean
 }
 
 smooth = lambda data: sm.nonparametric.lowess (
@@ -33,13 +43,13 @@ train_data_loader, test_data_loader = ACDCDataset("./dataset/training/*")
 model = modelset[args.model]()
 optimizer = AdamW(model.parameters(), lr=1e-4, eps=1e-6)
 train_all_loss = []
-train_all_dice = []
-test_all_dice = []
+train_all_metric = []
+test_all_metric = []
 for epoch in range(30):
-    losses, ious = train(epoch, model, train_data_loader, optimizer, device)
+    losses, m = train(epoch, model, train_data_loader, optimizer, metrics[args.metric], device)
     train_all_loss.extend(losses)
-    train_all_dice.extend(ious)
-    test_all_dice.extend(test(epoch, model, test_data_loader, device))
+    train_all_metric.extend(m)
+    test_all_metric.extend(test(epoch, model, test_data_loader, metrics[args.metric], device))
 
 
 torch.save(model, f'models/model-{args.model}-{losses[-1]:.6f}.pt')
@@ -49,13 +59,13 @@ plt.xlabel('step')
 plt.ylabel('loss')
 plt.savefig('img/train/loss.png')
 plt.clf()
-plt.plot(smooth(train_all_dice))
+plt.plot(smooth(train_all_metric))
 plt.xlabel('step')
-plt.ylabel('train mean iou')
-plt.savefig('img/train/iou.png')
+plt.ylabel(f'train mean {args.metric}')
+plt.savefig(f'img/train/{args.metric}.png')
 plt.clf()
-plt.plot(smooth(test_all_dice))
+plt.plot(smooth(test_all_metric))
 plt.xlabel('step')
-plt.ylabel('test mean iou')
-plt.savefig('img/test/iou.png')
+plt.ylabel(f'test mean {args.metric}')
+plt.savefig(f'img/test/{args.metric}.png')
 plt.close()

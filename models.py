@@ -24,16 +24,11 @@ class UNet(nn.Module):
         self.pool = nn.MaxPool2d(2, 2)
 
         self.left_conv_1 = DoubleConv(input_channels, 48)
-
         self.left_conv_2 = DoubleConv(48, 96)
-
         self.left_conv_3 = DoubleConv(96, 192)
-
         self.left_conv_4 = DoubleConv(192, 384)
 
-
         self.center_conv = DoubleConv(384, 768)
-
 
         self.up_1 = nn.ConvTranspose2d(768, 384, 2, 2)
         self.right_conv_1 = DoubleConv(768, 384)
@@ -89,7 +84,7 @@ class UNet(nn.Module):
         return output
 
 
-class UnetPlusPlus(nn.Module):
+class UNetPlusPlus(nn.Module):
     def __init__(self, input_channels=1, output_channels=4, deep_supervision=False):
         super().__init__()
 
@@ -108,7 +103,6 @@ class UnetPlusPlus(nn.Module):
         self.conv_0_2 = DoubleConv(64*3, 64)
         self.conv_0_3 = DoubleConv(64*4, 64)
         self.conv_0_4 = DoubleConv(64*5, 64)
- 
  
         self.stage_0 = DoubleConv(input_channels, 64)
         self.stage_1 = DoubleConv(64, 128)

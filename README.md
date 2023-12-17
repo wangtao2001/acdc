@@ -84,6 +84,9 @@ $$
     IoU = \frac{ pred \cap true }{ pred \cup true}
 $$
 
+Hausdorff distance:
+
+Hausdorff distance 用于分割指标，主要是用来度量边界的分割准确度。
 
 评估指标见 `metric.py`。
 
