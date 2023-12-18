@@ -7,7 +7,7 @@ import nibabel as nib
 
 seed = torch.random.seed()
 
-def ACDCDataset(dataset_path, num=0.9, batch_size=4):
+def ACDCDataset(dataset_path, num=0.9, batch_size=16):
     root = glob.glob(dataset_path)
     imgs_path = []
     labels_path = []

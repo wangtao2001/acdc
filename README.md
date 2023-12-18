@@ -56,11 +56,15 @@ acdc_challenge_20170617/
 
 ## 4.模型
 
-#### Model 1: UNet
+#### Model 1: FCN
+
+FCN与经典的CNN在卷积层之后使用全连接层得到固定长度的特征向量进行分类（全联接层＋softmax输出）不同，FCN可以接受任意尺寸的输入图像，采用反卷积层对最后一个卷积层的feature map进行上采样, 使它恢复到输入图像相同的尺寸，从而在上采样的特征图上进行逐像素分类。
+
+#### Model 2: UNet
 
 UNet是典型的Encoder-Decoder结构，在Encoder中先对图片进行卷积和池化，然后对特征图做上采样或者反卷积，同时对之前的特征图进行通道上的拼接concat。UNet网络层越深得到的特征图，有着更大的视野域，同时通过特征的拼接，来实现边缘特征的找回。
 
-#### Model 2: UNet++
+#### Model 3: UNet++
 
 UNet++由不同深度的UNet组成，其重新设计了skip connection，使得解码器的子网络可以聚合不同尺度的特征，更加灵活。同时通过deep supervision也可以做剪枝。更多细节见参考[6]。
 

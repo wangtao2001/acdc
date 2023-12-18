@@ -17,6 +17,38 @@ class DoubleConv(nn.Module):
         return self.double_conv(x)
 
 
+class FCN8s(nn.Module):
+    def __init__(self, input_channels=1, out_channels=4):
+        super().__init__()
+        self.pool = nn.MaxPool2d(2,2)
+        
+        self.cov1 = DoubleConv(input_channels, 64)
+        self.cov2 = DoubleConv(64, 128)
+        self.cov3 = DoubleConv(128, 256)
+        self.cov4 = DoubleConv(256, 512)
+        self.cov5 = DoubleConv(512, 512)
+        self.cov6 = DoubleConv(512, 1024)
+
+        self.up3 = nn.ConvTranspose2d(256, out_channels, 1)
+        self.up4 = nn.ConvTranspose2d(512, out_channels, 1)
+        self.up6 = nn.ConvTranspose2d(1024, out_channels, 2, 2)
+        self.up7 = nn.ConvTranspose2d(out_channels, out_channels, 2, 2)
+        self.up8 = nn.ConvTranspose2d(out_channels, out_channels, 8, 8) #8s的来源
+
+
+    def forward(self, x):
+        x1 = self.pool(self.cov1(x))
+        x2 = self.pool(self.cov2(x1))
+        x3 = self.pool(self.cov3(x2))
+        x4 = self.pool(self.cov4(x3))
+        x5 = self.pool(self.cov5(x4))
+        x6 = self.cov6(x5) # 不需要接池化
+
+        x7 = self.up4(x4) + self.up6(x6)
+        x8 = self.up3(x3) + self.up7(x7)
+        return self.up8(x8)
+
+
 class UNet(nn.Module):
     def __init__(self, input_channels=1, output_channels=4):
         super().__init__()
@@ -192,4 +224,3 @@ class UNetPlusPlus(nn.Module):
             return [out_put1, out_put2, out_put3, out_put4]
         else:
             return self.final_super_0_4(x_0_4)
-    

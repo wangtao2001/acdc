@@ -3,7 +3,7 @@ from torch.utils.data import DataLoader
 import torch
 from run import train, test
 import os
-from models import UNet, UNetPlusPlus
+from models import FCN8s, UNet, UNetPlusPlus
 from torch.optim import AdamW
 from matplotlib import pyplot as plt
 import statsmodels.api as sm
@@ -15,7 +15,7 @@ parser.add_argument(
     '--model',
     type=str,
     required=True,
-    choices=['unet', 'unetpp']
+    choices=['fcn', 'unet', 'unetpp']
 )
 parser.add_argument(
     '--metric',
@@ -26,7 +26,7 @@ parser.add_argument(
 args = parser.parse_args()
 
 modelset = {
-    'unet': UNet, 'unetpp': UNetPlusPlus
+    'fcn': FCN8s, 'unet': UNet, 'unetpp': UNetPlusPlus
 }
 metrics = {
     'dice': dice_mean, 'iou': iou_mean, 'hd95': hd95_mean
@@ -38,7 +38,8 @@ smooth = lambda data: sm.nonparametric.lowess (
 
 os.environ['CUDA_VISIBLE_DEVICES'] = '1'
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
-train_data_loader, test_data_loader = ACDCDataset("./dataset/training/*")
+batch_size = 16
+train_data_loader, test_data_loader = ACDCDataset("./dataset/training/*", batch_size=batch_size)
 
 model = modelset[args.model]()
 optimizer = AdamW(model.parameters(), lr=1e-4, eps=1e-6)
