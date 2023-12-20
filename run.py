@@ -3,7 +3,7 @@ from torch.nn import CrossEntropyLoss
 import torch
 import numpy as np
 
-def train(epoch, model, iterator, optimizer, metric,device):
+def train(epoch, model, iterator, optimizer, metric, scheduler, device):
     model = model.to(device)
     model.train()
     criterion = CrossEntropyLoss()
@@ -20,9 +20,10 @@ def train(epoch, model, iterator, optimizer, metric,device):
             # hat:(batch, 4, H, W) 4：类别数
             l = criterion(hat, label.long())
             losses.append(l.item())
-            optimizer.zero_grad()
             l.backward()
             optimizer.step()
+            scheduler.step()
+            optimizer.zero_grad()
 
             with torch.no_grad():
                 pred = torch.argmax(hat, dim=1)

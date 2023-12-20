@@ -1,5 +1,4 @@
 from data import ACDCDataset
-from torch.utils.data import DataLoader
 import torch
 from run import train, test
 import os
@@ -9,6 +8,7 @@ from matplotlib import pyplot as plt
 import statsmodels.api as sm
 import argparse
 from metric import dice_mean, iou_mean, hd95_mean
+from transformers import get_linear_schedule_with_warmup
 
 parser = argparse.ArgumentParser()
 parser.add_argument(
@@ -39,18 +39,23 @@ smooth = lambda data: sm.nonparametric.lowess (
 os.environ['CUDA_VISIBLE_DEVICES'] = '1'
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 batch_size = 16
-train_data_loader, test_data_loader = ACDCDataset("./dataset/training/*", batch_size=batch_size)
-
+train_iterator, test_iterator = ACDCDataset("./dataset/training/*", batch_size=batch_size)
+epochs = 30
+total_steps = len(train_iterator) * epochs # 总步数
+warm_up_ratio = 0.1 # 预热10%
 model = modelset[args.model]()
-optimizer = AdamW(model.parameters(), lr=1e-4, eps=1e-6)
+optimizer = AdamW(model.parameters(), lr=1e-3, eps=1e-6)
+# 线性学习率预热
+scheduler = get_linear_schedule_with_warmup(optimizer, num_warmup_steps=total_steps*warm_up_ratio, num_training_steps=total_steps)
+
 train_all_loss = []
 train_all_metric = []
 test_all_metric = []
-for epoch in range(30):
-    losses, m = train(epoch, model, train_data_loader, optimizer, metrics[args.metric], device)
+for epoch in range(epochs):
+    losses, m = train(epoch, model, train_iterator, optimizer, metrics[args.metric], scheduler ,device)
     train_all_loss.extend(losses)
     train_all_metric.extend(m)
-    test_all_metric.extend(test(epoch, model, test_data_loader, metrics[args.metric], device))
+    test_all_metric.extend(test(epoch, model, test_iterator, metrics[args.metric], device))
 
 
 torch.save(model, f'models/model-{args.model}-{losses[-1]:.6f}.pt')

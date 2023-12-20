@@ -26,12 +26,12 @@ class FCN8s(nn.Module):
         self.cov2 = DoubleConv(64, 128)
         self.cov3 = DoubleConv(128, 256)
         self.cov4 = DoubleConv(256, 512)
-        self.cov5 = DoubleConv(512, 512)
-        self.cov6 = DoubleConv(512, 1024)
+        self.cov5 = DoubleConv(512, 512) # VGG16到此
+        self.cov6 = nn.Conv2d(512, 4096, 3, 1, 1)
 
         self.up3 = nn.ConvTranspose2d(256, out_channels, 1)
         self.up4 = nn.ConvTranspose2d(512, out_channels, 1)
-        self.up6 = nn.ConvTranspose2d(1024, out_channels, 2, 2)
+        self.up6 = nn.ConvTranspose2d(4096, out_channels, 2, 2)
         self.up7 = nn.ConvTranspose2d(out_channels, out_channels, 2, 2)
         self.up8 = nn.ConvTranspose2d(out_channels, out_channels, 8, 8) #8s的来源
 
